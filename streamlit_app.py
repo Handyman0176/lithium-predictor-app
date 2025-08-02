@@ -13,8 +13,11 @@ import numpy as np
 import joblib
 from catboost import CatBoostRegressor
 
-# Load trained models
-model = joblib.load("catboost_model.pkl")
+# Load CatBoost from .cbm file (not pickle!)
+model = CatBoostRegressor()
+model.load_model("catboost_model.cbm")
+
+# Load KMeans as usual
 kmeans = joblib.load("kmeans_model.pkl")
 
 # Feature names
