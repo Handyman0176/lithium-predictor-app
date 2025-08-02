@@ -11,6 +11,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+from catboost import CatBoostRegressor  # 👈 this is essential for unpickling
 
 # Load trained models
 model = joblib.load("catboost_model.pkl")
