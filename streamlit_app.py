@@ -111,3 +111,48 @@ if st.button("🔮 Predict Lithium Concentration", key="predict_btn"):
         ],
         tooltip={"text": "Li: {Li} mg/L\nLat: {lat}\nLon: {lon}"}
     ))
+
+# ---------------------------
+# 📄 Batch Prediction via CSV
+# ---------------------------
+st.header("📄 Batch Prediction via CSV Upload")
+uploaded_file = st.file_uploader("Upload a CSV with well data", type=["csv"])
+
+if uploaded_file is not None:
+    df_input = pd.read_csv(uploaded_file)
+
+    required_columns = ['LATITUDE', 'LONGITUDE', 'Na', 'K', 'Mg', 'Ca', 'Sr',
+                        'Cl', 'TDS', 'PH', 'I', 'B', 'FORMATION']
+    missing = [col for col in required_columns if col not in df_input.columns]
+    if missing:
+        st.error(f"Missing required columns: {missing}")
+    else:
+        df_input = df_input.dropna(subset=required_columns)
+        df_input["BASIN"] = "Permian"
+        df_input["RegionCluster"] = kmeans.predict(df_input[["LATITUDE", "LONGITUDE"]])
+        df_input["Predicted_Li_mg_L"] = model.predict(df_input)
+
+        st.success(f"✅ Predicted lithium for {len(df_input)} wells.")
+        st.dataframe(df_input[["LATITUDE", "LONGITUDE", "FORMATION", "Predicted_Li_mg_L"]])
+
+        st.subheader("📍 Predicted Lithium Map (Batch)")
+        st.pydeck_chart(pdk.Deck(
+            initial_view_state=pdk.ViewState(
+                latitude=df_input["LATITUDE"].mean(),
+                longitude=df_input["LONGITUDE"].mean(),
+                zoom=6,
+                pitch=0,
+            ),
+            layers=[
+                pdk.Layer(
+                    "ScatterplotLayer",
+                    data=df_input,
+                    get_position='[LONGITUDE, LATITUDE]',
+                    get_fill_color='[255, 255 - Predicted_Li_mg_L, 100, 160]',
+                    get_radius='5000 + Predicted_Li_mg_L * 20',
+                    pickable=True
+                )
+            ],
+            tooltip={"text": "Li: {Predicted_Li_mg_L} mg/L\nFormation: {FORMATION}"}
+        ))
+
