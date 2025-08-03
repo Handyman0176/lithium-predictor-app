@@ -34,8 +34,29 @@ ph = st.number_input("pH", value=6.5)
 i = st.number_input("Iodine (I) (mg/L)", value=0.05)
 b = st.number_input("Boron (B) (mg/L)", value=5.0)
 
-formation = st.selectbox("Formation", ["Bone Spring", "Delaware", "Wolfcamp"])
-basin = st.selectbox("Basin", ["Delaware", "Midland", "Central Platform"])
+formation_options = sorted([
+    "Abo", "Abo Reef", "Atoka", "Bell Canyon", "Bend", "Blinebry Clearfork",
+    "Blinebry Grayburg San And", "C Pecos Wolfcamp Lower", "Caddo", "Cambrian",
+    "Canyon", "Canyon Sand", "Canyon Upper", "Cherry Canyon", "Chinle",
+    "Cisco", "Clear Fork", "Coleman Junction", "Dean", "Delaware",
+    "Delaware Bell Canyon", "Delaware Sd.", "Detrital Devonian", "Devonian",
+    "Ellenberger", "Ellenburger", "Flippen", "Formation", "Fusselman",
+    "Gardner", "Glorieta", "Grayburg", "Grayburg - San Andres", "Holt",
+    "Jackson", "Limey Shale", "Lo Abo", "Lower Devonian", "Mckee",
+    "Mid Delaware", "Mississippian", "Montoya Ellenburger", "Pnl", "Penn",
+    "Pennsylvanian", "Pennsylvanian Odom", "Pennsylvanian Strawn",
+    "Permian", "Permian Detrital", "Permian Lower", "San Andres",
+    "San Angelo", "Santa Rosa", "Seven Rivers", "Silurian", "Simpson",
+    "Spraberry", "Spraberry", "Strawn", "Strawn Reef", "Tubb Lower",
+    "Unknown", "Waddell", "Waddell Simpson", "Wilberns", "Wolfcamp",
+    "Wolfcamp Abo", "Wolfcamp Penn", "Wolfcamp Sterling", "Wichita",
+    "Wichita Albany", "Yates"
+])
+# Fixed basin
+basin = "Permian"
+
+# Updated formation dropdown
+formation = st.selectbox("Formation", formation_options)
 
 # RegionCluster (use same kmeans logic)
 coords = pd.DataFrame({"LATITUDE": [latitude], "LONGITUDE": [longitude]})
