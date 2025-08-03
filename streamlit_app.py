@@ -92,6 +92,13 @@ if st.button("🔮 Predict Lithium Concentration", key="predict_btn"):
         'Li': [prediction]
     })
 
+    def lithium_to_color(value, min_val=0, max_val=200):
+    """Map lithium value to RGB color: low = blue, high = red."""
+    normalized = min(max((value - min_val) / (max_val - min_val), 0), 1)
+    red = int(255 * normalized)
+    blue = int(255 * (1 - normalized))
+    return [red, 50, blue, 160]
+    
     st.pydeck_chart(pdk.Deck(
         initial_view_state=pdk.ViewState(
             latitude=latitude,
@@ -131,9 +138,17 @@ if uploaded_file is not None:
         df_input["BASIN"] = "Permian"
         df_input["RegionCluster"] = kmeans.predict(df_input[["LATITUDE", "LONGITUDE"]])
         df_input["Predicted_Li_mg_L"] = model.predict(df_input)
+        df_input["COLOR"] = df_input["Predicted_Li_mg_L"].apply(lithium_to_color)
 
         st.success(f"✅ Predicted lithium for {len(df_input)} wells.")
         st.dataframe(df_input[["LATITUDE", "LONGITUDE", "FORMATION", "Predicted_Li_mg_L"]])
+
+st.download_button(
+    label="📥 Download Predictions as CSV",
+    data=df_input.to_csv(index=False),
+    file_name="lithium_predictions.csv",
+    mime="text/csv"
+)
 
         st.subheader("📍 Predicted Lithium Map (Batch)")
         st.pydeck_chart(pdk.Deck(
@@ -148,11 +163,12 @@ if uploaded_file is not None:
                     "ScatterplotLayer",
                     data=df_input,
                     get_position='[LONGITUDE, LATITUDE]',
-                    get_fill_color='[255, 255 - Predicted_Li_mg_L, 100, 160]',
+                    get_fill_color='COLOR',
                     get_radius='5000 + Predicted_Li_mg_L * 20',
                     pickable=True
                 )
             ],
             tooltip={"text": "Li: {Predicted_Li_mg_L} mg/L\nFormation: {FORMATION}"}
         ))
+        st.markdown("🟦 **Low Lithium** → 🟥 **High Lithium**")
 
