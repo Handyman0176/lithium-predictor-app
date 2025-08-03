@@ -92,7 +92,7 @@ if st.button("🔮 Predict Lithium Concentration", key="predict_btn"):
         'Li': [prediction]
     })
 
-    def lithium_to_color(value, min_val=0, max_val=200):
+def lithium_to_color(value, min_val=0, max_val=200):
     """Map lithium value to RGB color: low = blue, high = red."""
     normalized = min(max((value - min_val) / (max_val - min_val), 0), 1)
     red = int(255 * normalized)
