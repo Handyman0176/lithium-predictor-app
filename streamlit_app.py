@@ -77,6 +77,10 @@ region_cluster = int(kmeans.predict(latlon)[0])
 user_input["RegionCluster"] = region_cluster
 
 st.markdown(f"🧭 **Auto-Assigned Region Cluster**: `{region_cluster}`")
+st.write("Input DataFrame:")
+st.write(input_df)
+st.write("Data types:")
+st.write(input_df.dtypes)
 
 # Make prediction
 if st.button("🔍 Predict Lithium"):
