@@ -99,6 +99,31 @@ if mode == "Manual Input":
 # ------------------
 # Mode: CSV Upload
 # ------------------
+st.info("ℹ️ Your CSV should have the following columns (case-sensitive):")
+
+sample_data = pd.DataFrame({
+    "LATITUDE": [31.5],
+    "LONGITUDE": [-103.5],
+    "Na": [10000],
+    "K": [500],
+    "Mg": [300],
+    "Ca": [1500],
+    "Sr": [100],
+    "Cl": [18000],
+    "TDS": [25000],
+    "PH": [6.5],
+    "I": [0.05],
+    "B": [5.0],
+    "FORMATION": ["Wolfcamp"]
+})
+st.dataframe(sample_data)
+st.download_button(
+    label="📄 Download Sample CSV Template",
+    data=sample_data.to_csv(index=False),
+    file_name="lithium_sample_template.csv",
+    mime="text/csv"
+)
+st.markdown("---")
 elif mode == "Upload CSV":
     st.header("📤 Upload CSV for Batch Prediction")
     uploaded_file = st.file_uploader("Upload a CSV with well data", type=["csv"])
