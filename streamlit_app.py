@@ -48,39 +48,46 @@ with st.form("input_form"):
 # 🔮 Prediction Logic
 # -------------------------
 if submitted:
-    # 🔹 Predict region cluster
-    coords = np.array([[latitude, longitude]])
-    region_cluster = str(kmeans.predict(coords)[0])  # cast to str to treat as categorical
+    try:
+        # Predict region cluster
+        coords = np.array([[latitude, longitude]])
+        region_cluster = str(kmeans.predict(coords)[0])
 
-    # 🔹 Assemble input DataFrame
-    input_df = pd.DataFrame([{
-        "LATITUDE": latitude,
-        "LONGITUDE": longitude,
-        "Na": na,
-        "K": k,
-        "Mg": mg,
-        "Ca": ca,
-        "Sr": sr,
-        "Cl": cl,
-        "TDS": tds,
-        "PH": ph,
-        "I": iodine,
-        "B": boron,
-        "FORMATION": formation,
-        "BASIN": basin,
-        "RegionCluster": region_cluster
-    }])
+        # Assemble input data
+        input_dict = {
+            "LATITUDE": float(latitude),
+            "LONGITUDE": float(longitude),
+            "Na": float(na),
+            "K": float(k),
+            "Mg": float(mg),
+            "Ca": float(ca),
+            "Sr": float(sr),
+            "Cl": float(cl),
+            "TDS": float(tds),
+            "PH": float(ph),
+            "I": float(iodine),
+            "B": float(boron),
+            "FORMATION": str(formation),
+            "BASIN": str(basin),
+            "RegionCluster": str(region_cluster)
+        }
 
-    # 🔹 Reorder columns
-    input_df = input_df[all_features]
+        # Create DataFrame with correct column order
+        input_df = pd.DataFrame([input_dict])[all_features]
 
-    # 🔹 Ensure categorical columns are strings
-    for col in cat_features:
-        input_df[col] = input_df[col].astype(str)
+        # Final safety casting
+        for col in ['LATITUDE', 'LONGITUDE', 'Na', 'K', 'Mg', 'Ca', 'Sr', 'Cl', 'TDS', 'PH', 'I', 'B']:
+            input_df[col] = pd.to_numeric(input_df[col], errors='raise')
 
-    # 🔹 Predict using Pool
-    input_pool = Pool(data=input_df, cat_features=cat_features)
-    prediction = model.predict(input_pool)[0]
+        for col in cat_features:
+            input_df[col] = input_df[col].astype(str)
 
-    # 🎉 Display result
-    st.success(f"📌 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
+        # Predict using Pool
+        input_pool = Pool(data=input_df, cat_features=cat_features)
+        prediction = model.predict(input_pool)[0]
+
+        st.success(f"📌 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
+
+    except Exception as e:
+        st.error("❌ Prediction failed. Check logs or data formatting.")
+        st.exception(e)
