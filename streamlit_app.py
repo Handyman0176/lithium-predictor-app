@@ -6,8 +6,8 @@ import joblib
 from catboost import CatBoostRegressor
 
 # Load model (CatBoost from .cbm file)
-model = CatBoostRegressor()
-model.load_model("catboost_model.cbm")
+import joblib
+model = joblib.load("catboost_model.pkl")
 
 # Load KMeans model
 kmeans = joblib.load("kmeans_model.pkl")
