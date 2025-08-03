@@ -150,7 +150,7 @@ st.download_button(
     mime="text/csv"
 )
 
-        st.subheader("📍 Predicted Lithium Map (Batch)")
+    st.subheader("📍 Predicted Lithium Map (Batch)")
         st.pydeck_chart(pdk.Deck(
             initial_view_state=pdk.ViewState(
                 latitude=df_input["LATITUDE"].mean(),
