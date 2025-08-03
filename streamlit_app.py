@@ -127,6 +127,7 @@ st.download_button(
 st.markdown("---")
 
 mode = st.radio("Choose Input Mode:", ["Manual Entry", "Upload CSV"])
+
 elif mode == "Upload CSV":
     st.header("📤 Upload CSV for Batch Prediction")
     uploaded_file = st.file_uploader("Upload a CSV with well data", type=["csv"])
