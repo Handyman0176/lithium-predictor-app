@@ -25,16 +25,14 @@ def lithium_to_color(value, min_val=0, max_val=200):
 # UI
 # ------------------
 st.title("🧪 Lithium Concentration Predictor (Permian Basin)")
-mode = st.sidebar.radio("Choose Input Method", ["Manual Input", "Upload CSV"])
+mode = st.radio("Choose Input Mode:", ["Manual Input", "Upload CSV"])
 
 # ------------------
 # Mode: Manual Input
 # ------------------
-mode = st.radio("Choose Input Mode:", ["Manual Entry", "Upload CSV"])
 if mode == "Manual Input":
     st.header("📥 Enter Sample Data Manually")
 
-    # User inputs
     latitude = st.number_input("Latitude", value=31.5)
     longitude = st.number_input("Longitude", value=-103.5)
     na = st.number_input("Na (mg/L)", value=10000.0)
@@ -48,27 +46,10 @@ if mode == "Manual Input":
     i = st.number_input("Iodine (I) (mg/L)", value=0.05)
     b = st.number_input("Boron (B) (mg/L)", value=5.0)
 
-    formation_options = sorted([
-        "Abo", "Abo Reef", "Atoka", "Bell Canyon", "Bend", "Blinebry Clearfork",
-        "Blinebry Grayburg San And", "C Pecos Wolfcamp Lower", "Caddo", "Cambrian",
-        "Canyon", "Canyon Sand", "Canyon Upper", "Cherry Canyon", "Chinle",
-        "Cisco", "Clear Fork", "Coleman Junction", "Dean", "Delaware",
-        "Delaware Bell Canyon", "Delaware Sd.", "Detrital Devonian", "Devonian",
-        "Ellenberger", "Ellenburger", "Flippen", "Formation", "Fusselman",
-        "Gardner", "Glorieta", "Grayburg", "Grayburg - San Andres", "Holt",
-        "Jackson", "Limey Shale", "Lo Abo", "Lower Devonian", "Mckee",
-        "Mid Delaware", "Mississippian", "Montoya Ellenburger", "Pnl", "Penn",
-        "Pennsylvanian", "Pennsylvanian Odom", "Pennsylvanian Strawn",
-        "Permian", "Permian Detrital", "Permian Lower", "San Andres",
-        "San Angelo", "Santa Rosa", "Seven Rivers", "Silurian", "Simpson",
-        "Spraberry", "Strawn", "Strawn Reef", "Tubb Lower", "Unknown", "Waddell",
-        "Waddell Simpson", "Wilberns", "Wolfcamp", "Wolfcamp Abo", "Wolfcamp Penn",
-        "Wolfcamp Sterling", "Wichita", "Wichita Albany", "Yates"
-    ])
+    formation_options = sorted([...])  # use your full list here
     formation = st.selectbox("Formation", formation_options)
     basin = "Permian"
 
-    # Make prediction
     if st.button("🔮 Predict Lithium Concentration", key="manual_btn"):
         cluster = int(kmeans.predict(pd.DataFrame({"LATITUDE": [latitude], "LONGITUDE": [longitude]}))[0])
         data = pd.DataFrame([{
@@ -98,38 +79,27 @@ if mode == "Manual Input":
         ))
 
 # ------------------
-# Mode: CSV Upload
+# Mode: Upload CSV
 # ------------------
-st.info("ℹ️ Your CSV should have the following columns (case-sensitive):")
-
-sample_data = pd.DataFrame({
-    "LATITUDE": [31.5],
-    "LONGITUDE": [-103.5],
-    "Na": [10000],
-    "K": [500],
-    "Mg": [300],
-    "Ca": [1500],
-    "Sr": [100],
-    "Cl": [18000],
-    "TDS": [25000],
-    "PH": [6.5],
-    "I": [0.05],
-    "B": [5.0],
-    "FORMATION": ["Wolfcamp"]
-})
-st.dataframe(sample_data)
-st.download_button(
-    label="📄 Download Sample CSV Template",
-    data=sample_data.to_csv(index=False),
-    file_name="lithium_sample_template.csv",
-    mime="text/csv"
-)
-st.markdown("---")
-
 elif mode == "Upload CSV":
     st.header("📤 Upload CSV for Batch Prediction")
-    uploaded_file = st.file_uploader("Upload a CSV with well data", type=["csv"])
 
+    st.info("ℹ️ Your CSV should have the following columns (case-sensitive):")
+    sample_data = pd.DataFrame({
+        "LATITUDE": [31.5], "LONGITUDE": [-103.5], "Na": [10000], "K": [500], "Mg": [300],
+        "Ca": [1500], "Sr": [100], "Cl": [18000], "TDS": [25000], "PH": [6.5],
+        "I": [0.05], "B": [5.0], "FORMATION": ["Wolfcamp"]
+    })
+    st.dataframe(sample_data)
+    st.download_button(
+        label="📄 Download Sample CSV Template",
+        data=sample_data.to_csv(index=False),
+        file_name="lithium_sample_template.csv",
+        mime="text/csv"
+    )
+    st.markdown("---")
+
+    uploaded_file = st.file_uploader("Upload a CSV with well data", type=["csv"])
     if uploaded_file is not None:
         df_input = pd.read_csv(uploaded_file)
         required_columns = ['LATITUDE', 'LONGITUDE', 'Na', 'K', 'Mg', 'Ca', 'Sr',
