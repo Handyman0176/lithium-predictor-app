@@ -8,8 +8,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
+
 # Load model and setup
-model = joblib.load("lithium_model.pkl")
+# Load in app.py
+import cloudpickle
+with open("lithium_model.pkl", "rb") as f:
+    model = cloudpickle.load(f)
 
 # UI Title
 st.title("🧪 Lithium Concentration Predictor (Permian Basin)")
