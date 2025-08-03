@@ -2,24 +2,15 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
-from catboost import CatBoostRegressor, Pool
 
-# 🎯 Load models
-model = CatBoostRegressor()
-model.load_model("catboost_model.cbm")  # CatBoost native format
+# Load pipeline model and kmeans
+model = joblib.load("catboost_model.pkl")
+kmeans = joblib.load("kmeans_model.pkl")
 
-kmeans = joblib.load("kmeans_model.pkl")  # KMeans for region clustering
+# Column order based on training
+features = ['LATITUDE', 'LONGITUDE', 'Na', 'K', 'Mg', 'Ca', 'Sr', 'Cl',
+            'TDS', 'PH', 'I', 'B', 'FORMATION', 'BASIN', 'RegionCluster']
 
-# 🎯 Define categorical features (MUST MATCH TRAINING)
-cat_features = ['FORMATION', 'BASIN', 'RegionCluster']
-
-# 🎯 Define full column order (MUST MATCH TRAINING)
-all_features = ['LATITUDE', 'LONGITUDE', 'Na', 'K', 'Mg', 'Ca', 'Sr', 'Cl',
-                'TDS', 'PH', 'I', 'B', 'FORMATION', 'BASIN', 'RegionCluster']
-
-# -------------------------
-# 🌐 Streamlit Interface
-# -------------------------
 st.title("🔮 Lithium Concentration Predictor")
 st.markdown("Input brine chemistry to estimate lithium concentration (mg/L)")
 
@@ -44,50 +35,27 @@ with st.form("input_form"):
     basin = st.selectbox("Basin", ["Delaware", "Midland", "Central Platform", "Other"])
     submitted = st.form_submit_button("Predict")
 
-# -------------------------
-# 🔮 Prediction Logic
-# -------------------------
 if submitted:
-    try:
-        # Predict region cluster
-        coords = np.array([[latitude, longitude]])
-        region_cluster = str(kmeans.predict(coords)[0])
+    region_cluster = kmeans.predict([[latitude, longitude]])[0]
 
-        # Assemble input data
-        input_dict = {
-            "LATITUDE": float(latitude),
-            "LONGITUDE": float(longitude),
-            "Na": float(na),
-            "K": float(k),
-            "Mg": float(mg),
-            "Ca": float(ca),
-            "Sr": float(sr),
-            "Cl": float(cl),
-            "TDS": float(tds),
-            "PH": float(ph),
-            "I": float(iodine),
-            "B": float(boron),
-            "FORMATION": str(formation),
-            "BASIN": str(basin),
-            "RegionCluster": str(region_cluster)
-        }
+    # Assemble input
+    input_data = pd.DataFrame([{
+        "LATITUDE": latitude,
+        "LONGITUDE": longitude,
+        "Na": na,
+        "K": k,
+        "Mg": mg,
+        "Ca": ca,
+        "Sr": sr,
+        "Cl": cl,
+        "TDS": tds,
+        "PH": ph,
+        "I": iodine,
+        "B": boron,
+        "FORMATION": formation,
+        "BASIN": basin,
+        "RegionCluster": region_cluster
+    }])[features]  # ensure correct column order
 
-        # Create DataFrame with correct column order
-        input_df = pd.DataFrame([input_dict])[all_features]
-
-        # Final safety casting
-        for col in ['LATITUDE', 'LONGITUDE', 'Na', 'K', 'Mg', 'Ca', 'Sr', 'Cl', 'TDS', 'PH', 'I', 'B']:
-            input_df[col] = pd.to_numeric(input_df[col], errors='raise')
-
-        for col in cat_features:
-            input_df[col] = input_df[col].astype(str)
-
-        # Predict using Pool
-        input_pool = Pool(data=input_df, cat_features=cat_features)
-        prediction = model.predict(input_pool)[0]
-
-        st.success(f"📌 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
-
-    except Exception as e:
-        st.error("❌ Prediction failed. Check logs or data formatting.")
-        st.exception(e)
+    prediction = model.predict(input_data)[0]
+    st.success(f"📌 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
