@@ -80,7 +80,7 @@ data = pd.DataFrame([{
     "FORMATION": formation,
     "BASIN": basin,
     "RegionCluster": cluster
-}])
+}])Which 
 
 # Prediction
 if st.button("🔮 Predict Lithium Concentration"):
@@ -89,7 +89,7 @@ if st.button("🔮 Predict Lithium Concentration"):
 
 import pydeck as pdk
 
-if st.button("🔮 Predict Lithium Concentration"):
+if st.button("🔮 Predict Lithium Concentration", key="predict_with_map"):
     prediction = model.predict(data)[0]
     st.success(f"🟢 **Predicted Lithium Concentration: {prediction:.2f} mg/L**")
 
