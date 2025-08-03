@@ -4,8 +4,17 @@ import numpy as np
 import joblib
 
 # Load models
-from catboost import CatBoostRegressor
+from catboost import CatBoostRegressor, Pool
+
 model = CatBoostRegressor()
+model.load_model("catboost_model.cbm")
+
+# Define categorical features
+cat_features = ['FORMATION', 'BASIN', 'RegionCluster']
+
+# Predict using CatBoost's Pool with cat_features specified
+data_pool = Pool(data=input_df, cat_features=cat_features)
+prediction = model.predict(data_pool)[0]
 model.load_model("catboost_model.cbm")
 kmeans = joblib.load("kmeans_model.pkl")
 
