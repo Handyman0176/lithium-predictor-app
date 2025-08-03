@@ -3,7 +3,11 @@ import pandas as pd
 import numpy as np
 import joblib
 from sklearn.cluster import KMeans
-
+from catboost import CatBoostRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.impute import SimpleImputer
 # Load model and setup
 model = joblib.load("lithium_model.pkl")
 
