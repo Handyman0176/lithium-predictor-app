@@ -15,6 +15,10 @@ import cloudpickle
 with open("lithium_model.pkl", "rb") as f:
     model = cloudpickle.load(f)
 
+import joblib
+kmeans = joblib.load("region_kmeans.pkl")
+cluster = int(kmeans.predict(coords)[0])
+
 # UI Title
 st.title("🧪 Lithium Concentration Predictor (Permian Basin)")
 
