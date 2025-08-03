@@ -30,6 +30,7 @@ mode = st.sidebar.radio("Choose Input Method", ["Manual Input", "Upload CSV"])
 # ------------------
 # Mode: Manual Input
 # ------------------
+mode = st.radio("Choose Input Mode:", ["Manual Entry", "Upload CSV"])
 if mode == "Manual Input":
     st.header("📥 Enter Sample Data Manually")
 
@@ -124,6 +125,8 @@ st.download_button(
     mime="text/csv"
 )
 st.markdown("---")
+
+mode = st.radio("Choose Input Mode:", ["Manual Entry", "Upload CSV"])
 elif mode == "Upload CSV":
     st.header("📤 Upload CSV for Batch Prediction")
     uploaded_file = st.file_uploader("Upload a CSV with well data", type=["csv"])
