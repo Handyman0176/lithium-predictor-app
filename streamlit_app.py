@@ -2,60 +2,60 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+from sklearn.cluster import KMeans
 
-# Load pipeline model and kmeans
-model = joblib.load("catboost_model.pkl")
-kmeans = joblib.load("kmeans_model.pkl")
+# Load model and setup
+model = joblib.load("lithium_model.pkl")
 
-# Column order based on training
-features = ['LATITUDE', 'LONGITUDE', 'Na', 'K', 'Mg', 'Ca', 'Sr', 'Cl',
-            'TDS', 'PH', 'I', 'B', 'FORMATION', 'BASIN', 'RegionCluster']
+# UI Title
+st.title("🧪 Lithium Concentration Predictor (Permian Basin)")
 
-st.title("🔮 Lithium Concentration Predictor")
-st.markdown("Input brine chemistry to estimate lithium concentration (mg/L)")
+# Input features
+st.header("📥 Input Sample Data")
 
-with st.form("input_form"):
-    col1, col2 = st.columns(2)
-    with col1:
-        latitude = st.number_input("Latitude", value=32.0)
-        longitude = st.number_input("Longitude", value=-103.0)
-        na = st.number_input("Sodium (Na)", value=10000.0)
-        k = st.number_input("Potassium (K)", value=100.0)
-        mg = st.number_input("Magnesium (Mg)", value=500.0)
-        ca = st.number_input("Calcium (Ca)", value=3000.0)
-    with col2:
-        sr = st.number_input("Strontium (Sr)", value=50.0)
-        cl = st.number_input("Chloride (Cl)", value=18000.0)
-        tds = st.number_input("Total Dissolved Solids (TDS)", value=300000.0)
-        ph = st.number_input("pH", value=6.5)
-        iodine = st.number_input("Iodine (I)", value=0.1)
-        boron = st.number_input("Boron (B)", value=50.0)
+latitude = st.number_input("Latitude", value=31.5)
+longitude = st.number_input("Longitude", value=-103.5)
+na = st.number_input("Na (mg/L)", value=10000.0)
+k = st.number_input("K (mg/L)", value=500.0)
+mg = st.number_input("Mg (mg/L)", value=300.0)
+ca = st.number_input("Ca (mg/L)", value=1500.0)
+sr = st.number_input("Sr (mg/L)", value=100.0)
+cl = st.number_input("Cl (mg/L)", value=18000.0)
+tds = st.number_input("TDS (mg/L)", value=25000.0)
+ph = st.number_input("pH", value=6.5)
+i = st.number_input("Iodine (I) (mg/L)", value=0.05)
+b = st.number_input("Boron (B) (mg/L)", value=5.0)
 
-    formation = st.selectbox("Formation", ["San Andres", "Ellenburger", "Wolfcamp", "Delaware", "Other"])
-    basin = st.selectbox("Basin", ["Delaware", "Midland", "Central Platform", "Other"])
-    submitted = st.form_submit_button("Predict")
+formation = st.selectbox("Formation", ["Bone Spring", "Delaware", "Wolfcamp"])
+basin = st.selectbox("Basin", ["Delaware", "Midland", "Central Platform"])
 
-if submitted:
-    region_cluster = kmeans.predict([[latitude, longitude]])[0]
+# RegionCluster (use same kmeans logic)
+coords = pd.DataFrame({"LATITUDE": [latitude], "LONGITUDE": [longitude]})
+kmeans = KMeans(n_clusters=3, random_state=42)
+# Fit with same training coordinates
+kmeans.fit(pd.read_csv("Permian_Lithium_CLEANED.csv")[["LATITUDE", "LONGITUDE"]].dropna())
+cluster = int(kmeans.predict(coords)[0])
 
-    # Assemble input
-    input_data = pd.DataFrame([{
-        "LATITUDE": latitude,
-        "LONGITUDE": longitude,
-        "Na": na,
-        "K": k,
-        "Mg": mg,
-        "Ca": ca,
-        "Sr": sr,
-        "Cl": cl,
-        "TDS": tds,
-        "PH": ph,
-        "I": iodine,
-        "B": boron,
-        "FORMATION": formation,
-        "BASIN": basin,
-        "RegionCluster": region_cluster
-    }])[features]  # ensure correct column order
+# Prepare dataframe for prediction
+data = pd.DataFrame([{
+    "LATITUDE": latitude,
+    "LONGITUDE": longitude,
+    "Na": na,
+    "K": k,
+    "Mg": mg,
+    "Ca": ca,
+    "Sr": sr,
+    "Cl": cl,
+    "TDS": tds,
+    "PH": ph,
+    "I": i,
+    "B": b,
+    "FORMATION": formation,
+    "BASIN": basin,
+    "RegionCluster": cluster
+}])
 
-    prediction = model.predict(input_data)[0]
-    st.success(f"📌 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
+# Prediction
+if st.button("🔮 Predict Lithium Concentration"):
+    prediction = model.predict(data)[0]
+    st.success(f"🟢 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
