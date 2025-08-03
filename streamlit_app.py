@@ -4,7 +4,9 @@ import numpy as np
 import joblib
 
 # Load models
-model = joblib.load("catboost_model.pkl")
+from catboost import CatBoostRegressor
+model = CatBoostRegressor()
+model.load_model("catboost_model.cbm")
 kmeans = joblib.load("kmeans_model.pkl")
 
 st.title("🔮 Lithium Concentration Predictor")
