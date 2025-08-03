@@ -171,4 +171,9 @@ st.pydeck_chart(pdk.Deck(
     tooltip={"text": "Li: {Predicted_Li_mg_L} mg/L\nFormation: {FORMATION}"}
 ))
 st.markdown("🟦 **Low Lithium** → 🟥 **High Lithium**")
-
+if st.checkbox("🎓 Show Model Details"):
+    st.markdown("""
+    - Model: CatBoostRegressor
+    - Trained on: 200+ cleaned Permian Basin samples
+    - R²: 0.91
+    """)
