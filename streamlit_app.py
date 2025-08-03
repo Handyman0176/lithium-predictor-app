@@ -150,25 +150,25 @@ st.download_button(
     mime="text/csv"
 )
 
-    st.subheader("📍 Predicted Lithium Map (Batch)")
-        st.pydeck_chart(pdk.Deck(
-            initial_view_state=pdk.ViewState(
-                latitude=df_input["LATITUDE"].mean(),
-                longitude=df_input["LONGITUDE"].mean(),
-                zoom=6,
-                pitch=0,
-            ),
-            layers=[
-                pdk.Layer(
-                    "ScatterplotLayer",
-                    data=df_input,
-                    get_position='[LONGITUDE, LATITUDE]',
-                    get_fill_color='COLOR',
-                    get_radius='5000 + Predicted_Li_mg_L * 20',
-                    pickable=True
-                )
-            ],
-            tooltip={"text": "Li: {Predicted_Li_mg_L} mg/L\nFormation: {FORMATION}"}
-        ))
-        st.markdown("🟦 **Low Lithium** → 🟥 **High Lithium**")
+st.subheader("📍 Predicted Lithium Map (Batch)")
+st.pydeck_chart(pdk.Deck(
+    initial_view_state=pdk.ViewState(
+        latitude=df_input["LATITUDE"].mean(),
+        longitude=df_input["LONGITUDE"].mean(),
+        zoom=6,
+        pitch=0,
+    ),
+    layers=[
+        pdk.Layer(
+            "ScatterplotLayer",
+            data=df_input,
+            get_position='[LONGITUDE, LATITUDE]',
+            get_fill_color='COLOR',
+            get_radius='5000 + Predicted_Li_mg_L * 20',
+            pickable=True
+        )
+    ],
+    tooltip={"text": "Li: {Predicted_Li_mg_L} mg/L\nFormation: {FORMATION}"}
+))
+st.markdown("🟦 **Low Lithium** → 🟥 **High Lithium**")
 
