@@ -61,29 +61,38 @@ formation_mapping = {
     "Unknown": "Unknown"
 }
 
-# Show friendly dropdown
+# User Input Section (this should already be collecting values for all numerical fields)
+# Example:
+# user_input["LATITUDE"] = st.number_input("LATITUDE")
+# ... same for LONGITUDE, Na, K, Mg, etc.
+
+# Friendly dropdown for FORMATION
 user_friendly_formations = list(formation_mapping.keys())
 selected_ui_value = st.selectbox("FORMATION", user_friendly_formations, index=user_friendly_formations.index("Wolfcamp (All)"))
 
-# Map dropdown value to what model expects
+# Map dropdown value to what the model expects
 user_input["FORMATION"] = formation_mapping[selected_ui_value]
 
-# Prefill BASIN (no dropdown needed)
+# Prefill BASIN (no dropdown)
 user_input["BASIN"] = "Permian"
 
-# Auto-calculate RegionCluster
+# Auto-calculate RegionCluster from k-means model
 latlon = [[user_input["LATITUDE"], user_input["LONGITUDE"]]]
 region_cluster = int(kmeans.predict(latlon)[0])
 user_input["RegionCluster"] = region_cluster
 
 st.markdown(f"🧭 **Auto-Assigned Region Cluster**: `{region_cluster}`")
+
+# ✅ CONVERT TO DATAFRAME HERE
+input_df = pd.DataFrame([user_input])
+
+# Optional debugging
 st.write("Input DataFrame:")
 st.write(input_df)
 st.write("Data types:")
 st.write(input_df.dtypes)
 
-# Make prediction
+# ✅ Prediction logic
 if st.button("🔍 Predict Lithium"):
-    input_df = pd.DataFrame([user_input])
     prediction = model.predict(input_df)[0]
     st.success(f"🧪 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
