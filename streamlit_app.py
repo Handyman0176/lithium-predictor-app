@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import cloudpickle
 import joblib
+
 from sklearn.cluster import KMeans
 from catboost import CatBoostRegressor
 from sklearn.pipeline import Pipeline
@@ -9,18 +11,9 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
 
-# Load model and setup
-# Load in app.py
-import cloudpickle
-with open("lithium_model.pkl", "rb") as f:
-    model = cloudpickle.load(f)
-
-import joblib
-kmeans = joblib.load("region_kmeans.pkl")
-cluster = int(kmeans.predict(coords)[0])
-
 # UI Title
 st.title("🧪 Lithium Concentration Predictor (Permian Basin)")
+st.write("Enter geochemical and location data to predict lithium concentration in mg/L.")
 
 # Input features
 st.header("📥 Input Sample Data")
@@ -51,25 +44,26 @@ formation_options = sorted([
     "Pennsylvanian", "Pennsylvanian Odom", "Pennsylvanian Strawn",
     "Permian", "Permian Detrital", "Permian Lower", "San Andres",
     "San Angelo", "Santa Rosa", "Seven Rivers", "Silurian", "Simpson",
-    "Spraberry", "Spraberry", "Strawn", "Strawn Reef", "Tubb Lower",
-    "Unknown", "Waddell", "Waddell Simpson", "Wilberns", "Wolfcamp",
-    "Wolfcamp Abo", "Wolfcamp Penn", "Wolfcamp Sterling", "Wichita",
-    "Wichita Albany", "Yates"
+    "Spraberry", "Strawn", "Strawn Reef", "Tubb Lower", "Unknown", "Waddell",
+    "Waddell Simpson", "Wilberns", "Wolfcamp", "Wolfcamp Abo", "Wolfcamp Penn",
+    "Wolfcamp Sterling", "Wichita", "Wichita Albany", "Yates"
 ])
+formation = st.selectbox("Formation", formation_options)
+
 # Fixed basin
 basin = "Permian"
 
-# Updated formation dropdown
-formation = st.selectbox("Formation", formation_options)
+# Load trained model and KMeans
+with open("lithium_model.pkl", "rb") as f:
+    model = cloudpickle.load(f)
 
-# RegionCluster (use same kmeans logic)
+kmeans = joblib.load("region_kmeans.pkl")
+
+# Compute RegionCluster using the same coordinates
 coords = pd.DataFrame({"LATITUDE": [latitude], "LONGITUDE": [longitude]})
-kmeans = KMeans(n_clusters=3, random_state=42)
-# Fit with same training coordinates
-kmeans.fit(pd.read_csv("Permian_Lithium_CLEANED.csv")[["LATITUDE", "LONGITUDE"]].dropna())
 cluster = int(kmeans.predict(coords)[0])
 
-# Prepare dataframe for prediction
+# Build DataFrame for prediction
 data = pd.DataFrame([{
     "LATITUDE": latitude,
     "LONGITUDE": longitude,
@@ -91,4 +85,4 @@ data = pd.DataFrame([{
 # Prediction
 if st.button("🔮 Predict Lithium Concentration"):
     prediction = model.predict(data)[0]
-    st.success(f"🟢 Predicted Lithium Concentration: **{prediction:.2f} mg/L**")
+    st.success(f"🟢 **Predicted Lithium Concentration: {prediction:.2f} mg/L**")
