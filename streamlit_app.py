@@ -86,3 +86,37 @@ data = pd.DataFrame([{
 if st.button("🔮 Predict Lithium Concentration"):
     prediction = model.predict(data)[0]
     st.success(f"🟢 **Predicted Lithium Concentration: {prediction:.2f} mg/L**")
+
+import pydeck as pdk
+
+if st.button("🔮 Predict Lithium Concentration"):
+    prediction = model.predict(data)[0]
+    st.success(f"🟢 **Predicted Lithium Concentration: {prediction:.2f} mg/L**")
+
+    # Plot using pydeck
+    df_map = pd.DataFrame({
+        'lat': [latitude],
+        'lon': [longitude],
+        'Li': [prediction]
+    })
+
+    st.pydeck_chart(pdk.Deck(
+        initial_view_state=pdk.ViewState(
+            latitude=latitude,
+            longitude=longitude,
+            zoom=6,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=df_map,
+                get_position='[lon, lat]',
+                get_fill_color='[255, 0, 0, 160]',
+                get_radius=5000 + (prediction * 20),  # Bigger circle for higher Li
+                pickable=True
+            )
+        ],
+        tooltip={"text": "Li: {Li} mg/L\nLat: {lat}\nLon: {lon}"}
+    ))
+
