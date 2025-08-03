@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import cloudpickle
 import joblib
+import pydeck as pdk
 
 from sklearn.cluster import KMeans
 from catboost import CatBoostRegressor
@@ -49,8 +50,6 @@ formation_options = sorted([
     "Wolfcamp Sterling", "Wichita", "Wichita Albany", "Yates"
 ])
 formation = st.selectbox("Formation", formation_options)
-
-# Fixed basin
 basin = "Permian"
 
 # Load trained model and KMeans
@@ -59,11 +58,11 @@ with open("lithium_model.pkl", "rb") as f:
 
 kmeans = joblib.load("region_kmeans.pkl")
 
-# Compute RegionCluster using the same coordinates
+# Compute RegionCluster
 coords = pd.DataFrame({"LATITUDE": [latitude], "LONGITUDE": [longitude]})
 cluster = int(kmeans.predict(coords)[0])
 
-# Build DataFrame for prediction
+# Build input DataFrame
 data = pd.DataFrame([{
     "LATITUDE": latitude,
     "LONGITUDE": longitude,
@@ -80,20 +79,13 @@ data = pd.DataFrame([{
     "FORMATION": formation,
     "BASIN": basin,
     "RegionCluster": cluster
-}])Which 
+}])
 
-# Prediction
-if st.button("🔮 Predict Lithium Concentration"):
+# Prediction + Map
+if st.button("🔮 Predict Lithium Concentration", key="predict_btn"):
     prediction = model.predict(data)[0]
     st.success(f"🟢 **Predicted Lithium Concentration: {prediction:.2f} mg/L**")
 
-import pydeck as pdk
-
-if st.button("🔮 Predict Lithium Concentration", key="predict_with_map"):
-    prediction = model.predict(data)[0]
-    st.success(f"🟢 **Predicted Lithium Concentration: {prediction:.2f} mg/L**")
-
-    # Plot using pydeck
     df_map = pd.DataFrame({
         'lat': [latitude],
         'lon': [longitude],
@@ -113,10 +105,9 @@ if st.button("🔮 Predict Lithium Concentration", key="predict_with_map"):
                 data=df_map,
                 get_position='[lon, lat]',
                 get_fill_color='[255, 0, 0, 160]',
-                get_radius=5000 + (prediction * 20),  # Bigger circle for higher Li
+                get_radius=5000 + (prediction * 20),
                 pickable=True
             )
         ],
         tooltip={"text": "Li: {Li} mg/L\nLat: {lat}\nLon: {lon}"}
     ))
-
